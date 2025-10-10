@@ -1,7 +1,7 @@
 from wkhtmltopdf.views import PDFTemplateResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from pgmagick import Image, Geometry, Blob, Color
+from pgmagick import Image, Geometry, Blob, Color, FilterTypes
 import math
 import base64
 
@@ -86,6 +86,8 @@ def process_image(request):
     # Scale the image to fit
     new_width = total_width
     new_height = int(total_width / image_aspect_ratio)
+
+    img.filterType(FilterTypes.PointFilter)
     
     # if new_height < total_height:
     #     new_height = total_height
@@ -107,13 +109,14 @@ def process_image(request):
     canvas = Image(Geometry(canvas_width, canvas_height), Color("white"))
     canvas.density(Geometry(DPI, DPI))
     canvas.composite(img, offset_x, offset_y)
-    canvas.magick("PNG")
+
+    canvas.magick("JPEG")
+    canvas.quality(85) 
     
     # Create image sections
     image_sections = []
     
-    print(sheets_vertical)
-    print(sheets_horizontal)
+
     for row in range(sheets_vertical):
         for col in range(sheets_horizontal):
             # Calculate crop coordinates
@@ -126,8 +129,9 @@ def process_image(request):
             page_img = Image(page_blob)
             page_img.crop(Geometry(PRINTABLE_WIDTH_PX, PRINTABLE_HEIGHT_PX, x, y))
             
-            # Convert to PNG for embedding in HTML
-            page_img.magick("PNG")
+            # Convert to JPEG for embedding in HTML
+            page_img.magick("JPEG")
+            page_img.quality(85)
             output_blob = Blob()
             page_img.write(output_blob)
             

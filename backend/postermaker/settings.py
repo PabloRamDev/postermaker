@@ -121,7 +121,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
 
 WKHTMLTOPDF_CMD_OPTIONS = {
 'quiet': True,
@@ -134,3 +133,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
     
 CORS_ALLOW_ALL_ORIGINS = True
+
+def ABS_DIR(rel):
+    return os.path.join(BASE_DIR, rel.replace('/', os.path.sep))
+
+STATIC_ROOT = ABS_DIR('postermaker/static/')
+STATIC_URL = '/static/'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+STATICFILES_DIRS = (
+    ABS_DIR('static'),
+)
