@@ -79,15 +79,30 @@ def process_image(request):
     
     # Calculate how many vertical sheets we need
     sheets_vertical = math.ceil(total_height / PRINTABLE_HEIGHT_PX)
-    
-    # Recalculate total height to match exact sheet count
-    total_height = PRINTABLE_HEIGHT_PX * sheets_vertical
+
+    # Special constraint: if single page width requested, limit to 1 page height
+    if sheets_horizontal == 1 and sheets_vertical > 1:
+        sheets_vertical = 1
+        total_height = PRINTABLE_HEIGHT_PX
+    else:
+        # Recalculate total height to match exact sheet count
+        total_height = PRINTABLE_HEIGHT_PX * sheets_vertical
 
     # Scale the image to fit
-    new_width = total_width
-    new_height = int(total_width / image_aspect_ratio)
+    if sheets_horizontal == 1 and sheets_vertical == 1:
+        # Special case: fit image to single page while maintaining aspect ratio
+        # Scale to fit within the printable area
+        scale_by_width = total_width / float(orig_width)
+        scale_by_height = PRINTABLE_HEIGHT_PX / float(orig_height)
+        scale_factor = min(scale_by_width, scale_by_height)
+        
+        new_width = int(orig_width * scale_factor)
+        new_height = int(orig_height * scale_factor)
+    else:
+        new_width = total_width
+        new_height = int(total_width / image_aspect_ratio)
 
-    img.filterType(FilterTypes.PointFilter)
+        img.filterType(FilterTypes.PointFilter)
     
     # if new_height < total_height:
     #     new_height = total_height

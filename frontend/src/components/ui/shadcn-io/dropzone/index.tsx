@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 import type { DropEvent, DropzoneOptions, FileRejection } from 'react-dropzone';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils"
 
 type DropzoneContextType = {
   src?: File[];
@@ -132,7 +132,7 @@ export const DropzoneContent = ({
 
   return (
     <div className={cn('flex flex-col items-center justify-center', className)}>
-      <div className="flex size-8 items-center justify-center rounded-md bg-muted text-muted-foreground">
+      <div className="flex size-8 items-center justify-center rounded-md bg-muted">
         <UploadIcon size={16} />
       </div>
       <p className="my-2 w-full truncate font-medium text-sm">
@@ -142,7 +142,7 @@ export const DropzoneContent = ({
             )} and ${src.length - maxLabelItems} more`
           : new Intl.ListFormat('en').format(src.map((file) => file.name))}
       </p>
-      <p className="w-full text-wrap text-muted-foreground text-xs">
+      <p className="w-full text-wrap text-xs">
         Drag and drop or click to replace
       </p>
     </div>
