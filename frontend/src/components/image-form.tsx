@@ -2,6 +2,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import DropzoneInput from "./drop-zone";
 import { DownloadIcon } from "lucide-react";
+import { Button } from "./ui/button";
 
 const ImageForm = () => {
   const { control, handleSubmit, register } = useForm({
@@ -50,7 +51,6 @@ const ImageForm = () => {
       .then((blob) => URL.createObjectURL(blob))
       // Update image
       .then((url) => setDownloadLink(url))
-      .catch((err) => console.error(err));
   };
   return (
     <>
@@ -67,12 +67,9 @@ const ImageForm = () => {
         />
           </div>
 
-        <button
-          className="flex justify-center items-center  p-2 bg-muted w-auto rounded-sm "
-          type="submit"
-        >
+        <Button type="submit">
           Submit
-        </button>
+        </Button>
       </form>
       {downloadLink && <a className="flex justify-center items-center  p-2 bg-muted w-auto rounded-sm " href={downloadLink} download="my-poster.pdf">
         <span>Download</span>
