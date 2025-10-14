@@ -116,8 +116,6 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-.container {
-}
 
 @layer base {
   * {

@@ -1,14 +1,20 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { type MouseEvent } from "react";
 import { Controller } from "react-hook-form";
 import Dropzone from "react-dropzone";
 import { Upload } from "lucide-react";
 import Thumbnail from "./thumbnail";
+import { useFileStore, type extendedFile } from "@/store/file-store";
 
-interface extendedFile extends File {
-  preview: string;
-}
+
 export default function DropzoneInput({ control, name }) {
-  const [file, setFile] = React.useState<extendedFile[]>([]);
+  
+  const {setFileUrl, preview, setPreview, setWidthHeight} = useFileStore()
+
+  const handleImageLoad = (e: any) => {
+        const { naturalHeight, naturalWidth } = e.target;
+        setWidthHeight(naturalWidth, naturalHeight);
+    };
 
   return (
     <Controller
@@ -19,30 +25,38 @@ export default function DropzoneInput({ control, name }) {
           multiple={false}
           onDrop={(acceptedFiles) => {
             onChange(acceptedFiles);
-            setFile(
-              acceptedFiles.map((file) =>
-                Object.assign(file, { preview: URL.createObjectURL(file) })
-              )
+            setPreview(
+              acceptedFiles.map((file) => 
+                {
+                  const img = new Image();
+                  img.src = URL.createObjectURL(file);
+                  img.onload = handleImageLoad
+ 
+                  return Object.assign(file, { preview: img.src, width: img.naturalWidth, height: img.naturalHeight })
+                }
+                
+             
+              ) as extendedFile[]
             );
           }}
         >
           {({ getRootProps, getInputProps }) => (
             <div
               {...getRootProps()}
-              className="flex flex-col items-center justify-center p-4 border-2 text-muted-foreground border-dashed"
+              className="flex flex-col items-center justify-center p-8 gap-4 border-2 rounded-md text-muted-foreground border-dashed w-1/2 cursor-pointer"
             >
               <input {...getInputProps()} onBlur={onBlur} />
 
-              {file.length <= 0 && (
+              {preview == null && (
                 <>
                   <Upload />
-                  <p>Drag 'n' drop some files here, or click to select files</p>
+                  <p>Haz click aquí o arrastra un archivo</p>
                 </>
               )}
               {value &&
                 value.map((file) => <div key={file.path}>{file.path}</div>)}
-              {file.map((thumb) => (
-                <Thumbnail key={thumb.preview} {...thumb} />
+              {preview?.map((thumb) => (
+                <Thumbnail onClose={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onChange(() => []); setPreview([]); setFileUrl("") }} key={thumb.preview} {...thumb} />
               ))}
             </div>
           )}
