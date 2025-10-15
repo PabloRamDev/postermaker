@@ -84,9 +84,8 @@ export default function SubmitSection() {
       </FieldSet>
 
       <Button type="submit" onClick={handleSubmit(onSubmit)} className="mt-auto font-semibold" disabled={formState.isSubmitting}>
-        {formState.isSubmitting && <Spinner />}
         Continuar
-        {!formState.isSubmitting && <ArrowRight />}
+        {!formState.isSubmitting ? <ArrowRight /> : <Spinner />}
       </Button>
       {/* <Button variant="destructive" onClick={reset} >
 Cancelar

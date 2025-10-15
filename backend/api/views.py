@@ -1,7 +1,7 @@
 from wkhtmltopdf.views import PDFTemplateResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from pgmagick import Image, Geometry, Blob, Color, FilterTypes
+from pgmagick import Image, Geometry, Blob, Color, FilterTypes, CompositeOperator
 import math
 import base64
 
@@ -36,7 +36,11 @@ def process_image(request):
     # Load original image first to detect orientation
     file_bytes = uploaded_file.read()
     blob = Blob(file_bytes)
-    img = Image(blob)
+    over = Image(blob)
+
+    img = Image(over.size(), "white")
+
+    img.composite(over, 0, 0, CompositeOperator.OverCompositeOp)
     
     # Get original dimensions
     size = img.size()
@@ -73,10 +77,8 @@ def process_image(request):
     
     # Calculate the width in pixels for the given number of horizontal sheets
     total_width = PRINTABLE_WIDTH_PX * sheets_horizontal
-    
     # Calculate the required height to maintain aspect ratio
     total_height = total_width / image_aspect_ratio
-    
     # Calculate how many vertical sheets we need
     sheets_vertical = math.ceil(total_height / PRINTABLE_HEIGHT_PX)
 
@@ -131,7 +133,6 @@ def process_image(request):
     # Create image sections
     image_sections = []
     
-
     for row in range(sheets_vertical):
         for col in range(sheets_horizontal):
             # Calculate crop coordinates
@@ -154,7 +155,6 @@ def process_image(request):
             img_base64 = base64.b64encode(output_blob.data).decode('utf-8')
             image_sections.append(img_base64)
     
-    print(len(image_sections))
     # Prepare context for template
     context = {
         'image_sections': image_sections,

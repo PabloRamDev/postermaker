@@ -27,12 +27,34 @@ export default function Preview({
     pageHeight = side * wRatio;
   }
 
-  const previewWidth = pageWidth * horizontal_sheets;
-  const previewHeight = previewWidth / imageAspectRatio;
-  const vertical_sheets = Math.max(1, Math.ceil(previewHeight / pageHeight));
 
-  const totalGridWidth = horizontal_sheets * pageWidth;
-  const totalGridHeight = vertical_sheets * pageHeight;
+  const previewWidth = pageWidth * horizontal_sheets;
+  let previewHeight = previewWidth / imageAspectRatio;
+  let vertical_sheets = Math.max(1, Math.ceil(previewHeight / pageHeight));
+
+  if (horizontal_sheets == 1 && vertical_sheets > 1)
+  {
+    vertical_sheets = 1
+    previewHeight = pageHeight;
+  }
+
+  let new_width: number;
+  let new_height: number;
+
+  if(horizontal_sheets == 1 && vertical_sheets == 1){
+    const scale_by_width = previewWidth / width;
+    const scale_by_height = previewHeight / height;
+    const scale_factor = Math.min(scale_by_width / scale_by_height);
+
+    new_width = width * scale_factor;
+    new_height = height * scale_factor;
+  }else{
+    new_width = previewWidth;
+    new_height = previewWidth / imageAspectRatio;
+  }
+
+  const totalGridWidth = horizontal_sheets * new_width;
+  const totalGridHeight = vertical_sheets * new_height;
   const gridAspectRatio = totalGridWidth / totalGridHeight;
 
 

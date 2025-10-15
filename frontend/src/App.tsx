@@ -29,10 +29,11 @@ function App() {
       <FormProvider {...methods}>
         <div className="flex flex-col h-full items-center w-full gap-8 px-8 py-20">
           <section className="flex flex-col justify-center w-full gap-2 items-center">
-            <h1 className="text-5xl font-black">P O S T E R   M A K E R</h1>
-            {!methods.formState.isDirty && !methods.formState.isSubmitSuccessful ? (
+            <h1 className="text-5xl font-black">P O S T E R M A K E R</h1>
+            {!methods.formState.isDirty &&
+            !methods.formState.isSubmitSuccessful ? (
               <p className="text-center text-xl font-semibold">
-                Sube una imagen y crea un poster en múltiples hojas facilmente
+                Sube una imagen y crea un poster para imprimir
               </p>
             ) : (
               <>
@@ -42,17 +43,6 @@ function App() {
                     los márgenes dependerán de su configuración de impresión
                   </span>
                 </p>
-                <Button
-                  variant="destructive"
-                  
-                  onClick={() => {
-                    methods.reset();
-                    setReset();
-                  }}
-                >
-                  Reiniciar
-                  <RotateCcw />
-                </Button>
               </>
             )}
           </section>
@@ -71,14 +61,24 @@ function App() {
           )}
 
           {fileUrl !== "" && (
-            <a
-              className="flex w-fit justify-center align-center px-4 py-2 gap-2 font-semibold bg-muted text-sm rounded-md"
-              href={fileUrl}
-              download={"poster"}
-            >
-              <span>Descargar</span>
-              <DownloadIcon />
-            </a>
+            <div className="flex items-center justify-center gap-2">
+              <Button asChild>
+                <a href={fileUrl} download={"poster"}>
+                  Descargar
+                  <DownloadIcon />
+                </a>
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  methods.reset();
+                  setReset();
+                }}
+              >
+                Reiniciar
+                <RotateCcw />
+              </Button>
+            </div>
           )}
         </div>
         {images.length > 0 && fileUrl == "" && <SubmitSection />}
