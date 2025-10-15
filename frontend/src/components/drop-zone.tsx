@@ -56,7 +56,7 @@ export default function DropzoneInput({ control, name }) {
               {value &&
                 value.map((file) => <div key={file.path}>{file.path}</div>)}
               {preview?.map((thumb) => (
-                <Thumbnail onClose={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onChange(() => []); setPreview([]); setFileUrl("") }} key={thumb.preview} {...thumb} />
+                <Thumbnail onClose={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onChange(() => []); setPreview(null); setFileUrl("") }} key={thumb.preview} {...thumb} />
               ))}
             </div>
           )}

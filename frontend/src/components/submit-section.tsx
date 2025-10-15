@@ -19,17 +19,12 @@ import { Spinner } from "./ui/spinner";
 import { ArrowRight } from "lucide-react";
 import axios from "axios";
 import { useFileStore } from "@/store/file-store";
-import Preview from "./preview";
 
 export default function SubmitSection() {
 
-  const { control, formState, handleSubmit, watch} = useFormContext();
-    const { setUploadProgress, setFileUrl, preview, previewHeight, previewWidth } = useFileStore();
+  const { control, formState, handleSubmit } = useFormContext();
+    const { setUploadProgress, setFileUrl } = useFileStore();
 
-    console.log(preview)
-    console.log(previewHeight)
-    console.log(previewWidth)
-    const sheets = watch("sheets_horizontal");
 
     const onSubmit = async (data) => {
     const formData = new FormData();
@@ -87,10 +82,6 @@ export default function SubmitSection() {
           )}
         />
       </FieldSet>
-{
-  preview !== null && previewHeight > 0 && previewWidth > 0 && sheets > 0 && 
-  <Preview imageUrl={preview[0].preview} width={previewWidth} height={previewHeight} horizontal_sheets={sheets}/>
-}
 
       <Button type="submit" onClick={handleSubmit(onSubmit)} className="mt-auto font-semibold" disabled={formState.isSubmitting}>
         {formState.isSubmitting && <Spinner />}

@@ -1,5 +1,3 @@
-import React from "react";
-
 interface PreviewProps {
   imageUrl: string;
   width: number;
