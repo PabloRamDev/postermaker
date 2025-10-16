@@ -57,8 +57,8 @@
   --primary-foreground: oklch(0.208 0.042 265.755);
   --secondary: oklch(0.279 0.041 260.031);
   --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
+  --muted: oklch(0.1483 0.0502 289.31);
+  --muted-foreground: oklch(0.9191 0.0099 289.31);
   --accent: oklch(0.279 0.041 260.031);
   --accent-foreground: oklch(0.984 0.003 247.858);
   --destructive: oklch(0.704 0.191 22.216);
@@ -87,7 +87,7 @@
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --background-image-gradient-1: radial-gradient(at 66% 93%, #5d067c 0px, transparent 50%), radial-gradient(at 23% 26%, #7c0660 0px, transparent 50%), radial-gradient(at 53% 55%, #7c0625 0px, transparent 50%), radial-gradient(at 78% 83%, #257c06 0px, transparent 50%), radial-gradient(at 91% 57%, #067c5d 0px, transparent 50%);
+  --background-image-gradient-1: radial-gradient(at 66% 93%, #5d067c 0px, transparent 50%), radial-gradient(at 23% 26%, #400332 0px, transparent 50%), radial-gradient(at 53% 55%, #7c0625 0px, transparent 50%), radial-gradient(at 78% 83%, #1e1133 0px, transparent 50%), radial-gradient(at 91% 57%, #1e1133 0px, transparent 50%);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -130,16 +130,11 @@
   }
 }
 
-
-
-
     
 .frosted-backdrop {
 backdrop-filter: blur(var(--_gradient-blur)) contrast(100%) brightness(100%);
 -webkit-backdrop-filter: blur(var(--_gradient-blur)) contrast(100%) brightness(100%);
 }
-
-
     
 .frosted-backdrop {
 backdrop-filter: blur(var(--_gradient-blur)) contrast(100%) brightness(100%);

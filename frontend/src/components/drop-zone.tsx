@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { type MouseEvent } from "react";
+import { type MouseEvent } from "react";
 import { Controller } from "react-hook-form";
 import Dropzone from "react-dropzone";
 import { Upload } from "lucide-react";
@@ -43,14 +43,14 @@ export default function DropzoneInput({ control, name }) {
           {({ getRootProps, getInputProps }) => (
             <div
               {...getRootProps()}
-              className="flex flex-col items-center justify-center p-8 gap-4 border-2 rounded-md text-muted-foreground border-dashed w-1/2 cursor-pointer"
+              className="flex flex-col items-center justify-center p-8 gap-4 border-2 rounded-md border-dashed w-full lg:w-1/2 cursor-pointer"
             >
               <input {...getInputProps()} onBlur={onBlur} />
 
               {preview == null && (
                 <>
                   <Upload />
-                  <p>Haz click aquí o arrastra un archivo</p>
+                  <p className="text-center">Haz click aquí o arrastra un archivo</p>
                 </>
               )}
               {value &&
