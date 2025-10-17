@@ -6,6 +6,9 @@ export interface extendedFile extends File {
 
 interface fileStore {
   uploadProgress: number;
+  open: boolean;
+  setOpen: () => void;
+  setClose: () => void;
   fileUrl: string;
   preview: extendedFile[];
   previewHeight: number;
@@ -19,15 +22,18 @@ interface fileStore {
 
 const useFileStore = create<fileStore>((set) => ({
   uploadProgress: 0,
+  open: false,
   fileUrl: "",
   preview: null,
   previewHeight: 0,
   previewWidth: 0,
   setUploadProgress: (percentage) => set({ uploadProgress: percentage }),
   setFileUrl: (url) => set({ fileUrl: url }),
-  setPreview: (file) => set({ preview: file }),
+  setPreview: (file) => set({ preview: file, open: true }),
   setWidthHeight: (width, height) =>
     set({ previewWidth: width, previewHeight: height }),
+  setOpen: () => set({open: true }),
+  setClose: () => set({open: false}),
   setReset: () => set({  uploadProgress: 0,
   fileUrl: "",
   preview: null,

@@ -1,42 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type MouseEvent } from "react";
-import { Controller } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import Dropzone from "react-dropzone";
 import { Upload } from "lucide-react";
-import Thumbnail from "./thumbnail";
 import { useFileStore, type extendedFile } from "@/store/file-store";
+import { usePreview } from "@/hooks/use-preview";
 
-
-export default function DropzoneInput({ control, name }) {
-  
-  const {setFileUrl, preview, setPreview, setWidthHeight} = useFileStore()
+export default function DropzoneInput() {
+  const { setFileUrl, preview, setPreview, setWidthHeight } = useFileStore();
+  const { control } = useFormContext();
 
   const handleImageLoad = (e: any) => {
-        const { naturalHeight, naturalWidth } = e.target;
-        setWidthHeight(naturalWidth, naturalHeight);
-    };
+    const { naturalHeight, naturalWidth } = e.target;
+    setWidthHeight(naturalWidth, naturalHeight);
+  };
+
+  const [createPreview] = usePreview();
 
   return (
     <Controller
       control={control}
-      name={name}
+      name={"image"}
       render={({ field: { onChange, onBlur, value } }) => (
         <Dropzone
           multiple={false}
           onDrop={(acceptedFiles) => {
             onChange(acceptedFiles);
             setPreview(
-              acceptedFiles.map((file) => 
-                {
-                  const img = new Image();
-                  img.src = URL.createObjectURL(file);
-                  img.onload = handleImageLoad
- 
-                  return Object.assign(file, { preview: img.src, width: img.naturalWidth, height: img.naturalHeight })
-                }
-                
-             
-              ) as extendedFile[]
+              acceptedFiles.map((file) => {
+                const img = new Image();
+                const objectUrl = URL.createObjectURL(file);
+
+                img.src = objectUrl;
+                img.onload = handleImageLoad;
+                return Object.assign(file, {
+                  preview: img.src,
+                  width: img.naturalWidth,
+                  height: img.naturalHeight,
+                });
+              }) as extendedFile[]
             );
           }}
         >
@@ -50,14 +52,19 @@ export default function DropzoneInput({ control, name }) {
               {preview == null && (
                 <>
                   <Upload />
-                  <p className="text-center">Haz click aquí o arrastra un archivo</p>
+                  <p className="text-center">
+                    Haz click aquí o arrastra un archivo
+                  </p>
                 </>
               )}
               {value &&
                 value.map((file) => <div key={file.path}>{file.path}</div>)}
-              {preview?.map((thumb) => (
-                <Thumbnail onClose={(e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onChange(() => []); setPreview(null); setFileUrl("") }} key={thumb.preview} {...thumb} />
-              ))}
+              {createPreview(preview, (e: MouseEvent<HTMLButtonElement>) => {
+                e.stopPropagation();
+                onChange(() => []);
+                setPreview(null);
+                setFileUrl("");
+              })}
             </div>
           )}
         </Dropzone>
