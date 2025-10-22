@@ -24,7 +24,7 @@ import FormWrapper from "./form-wrapper";
 export default function SubmitSection() {
   const { control, formState, handleSubmit, watch } =
     useFormContext();
-  const { setUploadProgress, setFileUrl } =
+  const { setUploadProgress, setFileUrl, setClose } =
     useFileStore();
 
   const image = watch("image");
@@ -37,7 +37,7 @@ export default function SubmitSection() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/image-pdf/",
+        "http://192.168.1.101:8000/api/image-pdf/",
         formData,
         {
           responseType: "blob", // Important for file download
@@ -55,9 +55,14 @@ export default function SubmitSection() {
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       setFileUrl(url);
+
+      setClose()
+
     } catch (error) {
       console.error("Download failed:", error);
     }
+
+    
   };
 
   return (

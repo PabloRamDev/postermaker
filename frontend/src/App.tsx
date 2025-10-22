@@ -5,13 +5,16 @@ import SubmitSection from "./components/submit-section";
 import * as z from "zod";
 import { formSchema } from "./schemas/form-schema";
 import { useFileStore } from "./store/file-store";
-import { DownloadIcon, RotateCcw } from "lucide-react";
+import { ArrowUpFromLineIcon, DownloadIcon, RotateCcw } from "lucide-react";
 import Preview from "./components/preview";
 import { Button } from "./components/ui/button";
 import { usePrompt } from "./hooks/use-prompt";
 import TextSection from "./components/text-section";
+import { useMediaQuery } from "react-responsive";
 
 function App() {
+  const isTabletOrMobile = useMediaQuery({ maxWidth: 1224 });
+
   const methods = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,6 +33,7 @@ function App() {
     previewWidth,
     setPreview,
     setFileUrl,
+    setOpen,
   } = useFileStore();
 
   const handleClose = () => {
@@ -41,9 +45,9 @@ function App() {
   const [newPrompt] = usePrompt();
 
   return (
-    <main className="flex frosted-backdrop h-screen w-full min-h-screen max-w-screen">
+    <main className="flex frosted-backdrop h-dvh w-dvw px-8">
       <FormProvider {...methods}>
-        <div className="flex flex-col h-full items-center justify-center w-full gap-8 px-8 py-20">
+        <div className="flex flex-col items-center justify-center w-full gap-8 py-20">
           <TextSection
             isDirty={methods.formState.isDirty}
             isSubmitSuccessful={methods.formState.isSubmitSuccessful}
@@ -52,47 +56,55 @@ function App() {
           previewHeight > 0 &&
           previewWidth > 0 &&
           parseInt(sheets) > 0 ? (
-            <Preview
-              imageUrl={preview[0].preview}
-              width={previewWidth}
-              height={previewHeight}
-              horizontal_sheets={parseInt(sheets)}
-              onClose={() => {
-                newPrompt({
-                  callback: handleClose,
-                  text: "Esta acción reiniciará el formulario. ¿Desea continuar?",
-                });
-              }}
-              disabled={methods.formState.isSubmitting}
-              showClose={!methods.formState.isSubmitSuccessful}
-            />
+            <>
+              <Preview
+                imageUrl={preview[0].preview}
+                width={previewWidth}
+                height={previewHeight}
+                horizontal_sheets={parseInt(sheets)}
+                onClose={() => {
+                  newPrompt({
+                    callback: handleClose,
+                    text: "Esta acción reiniciará el formulario. ¿Desea continuar?",
+                  });
+                }}
+                disabled={methods.formState.isSubmitting}
+                showClose={!methods.formState.isSubmitSuccessful}
+              />
+              {isTabletOrMobile && (
+                <Button variant="outline" aria-label="Submit" onClick={setOpen}>
+                  Abrir formulario
+                  <ArrowUpFromLineIcon />
+                </Button>
+              )}
+            </>
           ) : (
             <ImageForm />
           )}
 
-          <div className="flex items-center justify-center gap-2">
-            {fileUrl !== "" && (
-              <Button asChild className="w-full">
-                <a href={fileUrl} download={"poster"}>
+          {fileUrl !== "" && (
+            <div className="flex w-auto items-center justify-center gap-2 px-20">
+              <Button asChild className="flex basis-1">
+                <a className="w-full" href={fileUrl} download={"poster"}>
                   Descargar
                   <DownloadIcon />
                 </a>
               </Button>
-            )}
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() =>
-                newPrompt({
-                  callback: handleClose,
-                  text: "Esta acción reiniciará el formulario. ¿Desea continuar?",
-                })
-              }
-            >
-              Reiniciar
-              <RotateCcw />
-            </Button>
-          </div>
+              <Button
+                variant="destructive"
+                className="flex basis-1"
+                onClick={() =>
+                  newPrompt({
+                    callback: handleClose,
+                    text: "Esta acción reiniciará el formulario. ¿Desea continuar?",
+                  })
+                }
+              >
+                Reiniciar
+                <RotateCcw />
+              </Button>
+            </div>
+          )}
         </div>
         {images.length > 0 && <SubmitSection />}
       </FormProvider>

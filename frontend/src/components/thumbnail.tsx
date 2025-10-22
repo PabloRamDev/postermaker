@@ -23,7 +23,6 @@ export default function Thumbnail(file: dropFile) {
         <img
           src={file.preview}
           className="block w-auto h-auto"
-          // Revoke data uri after image is loaded
           onLoad={() => {
             URL.revokeObjectURL(file.preview);
           }}
