@@ -45,7 +45,7 @@ export default function DropzoneInput() {
           {({ getRootProps, getInputProps }) => (
             <div
               {...getRootProps()}
-              className="flex flex-col items-center justify-center p-8 gap-4 border-2 rounded-md border-dashed w-full lg:w-1/2 cursor-pointer"
+              className="flex flex-col items-center justify-center p-8 gap-4 border-2 rounded-md bg-white/5 frosted-backdrop border-dashed w-full lg:w-1/2 cursor-pointer"
             >
               <input {...getInputProps()} onBlur={onBlur} />
 

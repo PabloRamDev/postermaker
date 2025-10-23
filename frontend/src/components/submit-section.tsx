@@ -37,7 +37,7 @@ export default function SubmitSection() {
 
     try {
       const response = await axios.post(
-        "http://192.168.1.101:8000/api/image-pdf/",
+        `${import.meta.env.VITE_API_URL}/image-pdf/`,
         formData,
         {
           responseType: "blob", // Important for file download

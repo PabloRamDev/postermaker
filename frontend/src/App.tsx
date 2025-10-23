@@ -45,7 +45,7 @@ function App() {
   const [newPrompt] = usePrompt();
 
   return (
-    <main className="flex frosted-backdrop h-dvh w-dvw px-8">
+    <main className="flex frosted-backdrop h-dvh w-dvw">
       <FormProvider {...methods}>
         <div className="flex flex-col items-center justify-center w-full gap-8 py-20">
           <TextSection
