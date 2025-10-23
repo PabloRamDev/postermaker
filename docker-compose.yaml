@@ -1,5 +1,5 @@
 services:
-  web:
+  api:
     build: ./backend
     container_name: api_postermaker
     command: >
@@ -11,4 +11,13 @@ services:
     environment:
       DEBUG: "1"
       DJANGO_SECRET_KEY: "change_me"
+  web:
+    build: ./frontend
+    container_name: app_postermaker
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
 
