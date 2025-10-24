@@ -12,7 +12,10 @@ services:
       DEBUG: "1"
       DJANGO_SECRET_KEY: "change_me"
   web:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:8000/api"
     container_name: app_postermaker
     environment:
       - NODE_ENV=production

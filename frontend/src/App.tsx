@@ -47,7 +47,7 @@ function App() {
   return (
     <main className="flex frosted-backdrop h-dvh w-dvw">
       <FormProvider {...methods}>
-        <div className="flex flex-col items-center justify-center w-full gap-8 py-20">
+        <div className="flex flex-col items-center justify-center w-full gap-8 px-8 lg:px-0 py-20">
           <TextSection
             isDirty={methods.formState.isDirty}
             isSubmitSuccessful={methods.formState.isSubmitSuccessful}
