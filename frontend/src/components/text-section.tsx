@@ -1,5 +1,4 @@
 
-
 interface textSectionProps {
     isDirty: boolean;
     isSubmitSuccessful: boolean;

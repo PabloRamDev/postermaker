@@ -86,10 +86,9 @@ export default function SubmitSection() {
                   <SelectValue placeholder="Seleccione número" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
+                  {
+                    [...Array(6).keys()].map(n =><SelectItem key={`option-${n+1}`} value={`${n + 1}`}>{n + 1}</SelectItem>)
+                  }
                 </SelectContent>
               </Select>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -107,9 +106,6 @@ export default function SubmitSection() {
         Continuar
         {!formState.isSubmitting ? <ArrowRight /> : <Spinner />}
       </Button>
-      {/* <Button variant="destructive" onClick={reset} >
-Cancelar
-      </Button> */}
     </FormWrapper>
   );
 }
