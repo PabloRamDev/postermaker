@@ -22,12 +22,11 @@ import { useFileStore } from "@/store/file-store";
 import FormWrapper from "./form-wrapper";
 
 export default function SubmitSection() {
-  const { control, formState, handleSubmit, watch } =
+  const { control, formState, handleSubmit } =
     useFormContext();
   const { setUploadProgress, setFileUrl, setClose } =
     useFileStore();
 
-  const image = watch("image");
 
   const onSubmit = async (data) => {
     const formData = new FormData();
@@ -66,7 +65,7 @@ export default function SubmitSection() {
   };
 
   return (
-    <FormWrapper open={image !== null && !formState.isSubmitSuccessful}>
+    <FormWrapper>
       <FieldSet className="w-full flex flex-col justify-center">
         <FieldLegend className="text-3xl font-semibold">
           Configuración

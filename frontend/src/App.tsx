@@ -11,6 +11,7 @@ import { Button } from "./components/ui/button";
 import { usePrompt } from "./hooks/use-prompt";
 import TextSection from "./components/text-section";
 import { useMediaQuery } from "react-responsive";
+import Header from "./components/layout/header";
 
 function App() {
   const isTabletOrMobile = useMediaQuery({ maxWidth: 1224 });
@@ -45,9 +46,11 @@ function App() {
   const [newPrompt] = usePrompt();
 
   return (
-    <main className="flex frosted-backdrop h-dvh w-dvw">
+    <main className="flex flex-col items-center justify-center frosted-backdrop h-dvh w-dvw">
+                  <Header />
       <FormProvider {...methods}>
-        <div className="flex flex-col items-center justify-center w-full gap-8 px-8 lg:px-0 py-20">
+        <div className="flex grow min-h-0 h-full w-full px-8 md:px-0">
+                  <div className="flex flex-col items-center justify-center w-full gap-8 py-16">
           <TextSection
             isDirty={methods.formState.isDirty}
             isSubmitSuccessful={methods.formState.isSubmitSuccessful}
@@ -83,7 +86,7 @@ function App() {
           )}
 
           {fileUrl !== "" && (
-            <div className="flex w-auto items-center justify-center gap-2 px-20">
+            <div className="flex w-auto items-center justify-center gap-2">
               <Button asChild className="flex basis-1">
                 <a className="w-full" href={fileUrl} download={"poster"}>
                   Descargar
@@ -105,8 +108,12 @@ function App() {
               </Button>
             </div>
           )}
+           
         </div>
-        {images.length > 0 && <SubmitSection />}
+       {images.length > 0 && <SubmitSection />}
+        </div>
+
+
       </FormProvider>
     </main>
   );

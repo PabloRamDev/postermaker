@@ -7,7 +7,7 @@ import { useFileStore, type extendedFile } from "@/store/file-store";
 import { usePreview } from "@/hooks/use-preview";
 
 export default function DropzoneInput() {
-  const { setFileUrl, preview, setPreview, setWidthHeight } = useFileStore();
+  const { setFileUrl, setOpen ,preview, setPreview, setWidthHeight } = useFileStore();
   const { control } = useFormContext();
 
   const handleImageLoad = (e: any) => {
@@ -40,6 +40,7 @@ export default function DropzoneInput() {
                 });
               }) as extendedFile[]
             );
+            setOpen();
           }}
         >
           {({ getRootProps, getInputProps }) => (

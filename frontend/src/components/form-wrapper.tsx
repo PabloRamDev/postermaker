@@ -11,7 +11,6 @@ import { useFileStore } from "@/store/file-store";
 
 interface formWrapperProps {
   children: ReactNode;
-  open: boolean;
 }
 
 export default function FormWrapper({ children }: formWrapperProps) {
@@ -32,7 +31,7 @@ export default function FormWrapper({ children }: formWrapperProps) {
     );
   } else {
     return (
-      <aside className="flex grow flex-col items-center p-8 gap-4 dark:bg-muted border-l-2 botder-mutted w-1/2 h-full">
+      <aside className="flex grow flex-col items-center p-8 gap-4 dark:bg-muted border-l-2 botder-mutted w-1/2 h-auto">
         {children}
       </aside>
     );
