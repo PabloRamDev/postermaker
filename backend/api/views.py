@@ -1,25 +1,15 @@
 from wkhtmltopdf.views import PDFTemplateResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from pgmagick import Image, Geometry, Blob, Color, FilterTypes, CompositeOperator
-import math
+from PIL import Image, ImageOps
+from io import BytesIO
 import base64
+import math
 
 
 @api_view(['POST'])
 def process_image(request):
-    """
-    Process an image to fit across multiple letter-sized sheets and return as PDF.
-    
-    Expected JSON body:
-    {
-        "sheets_horizontal": 2      # number of sheets horizontally
-    }
-    
-    The view will automatically:
-    - Detect if the image is landscape or portrait based on aspect ratio
-    - Calculate the number of vertical sheets needed to maintain aspect ratio
-    """
+
     uploaded_file = request.FILES.get('image')
     if not uploaded_file:
         return Response({'error': 'No image uploaded'}, status=400)
@@ -33,23 +23,33 @@ def process_image(request):
     if sheets_horizontal < 1:
         return Response({'error': 'sheets_horizontal must be at least 1'}, status=400)
     
-    # Load original image first to detect orientation
+    # Load original image
     file_bytes = uploaded_file.read()
-    blob = Blob(file_bytes)
-    over = Image(blob)
-
-    img = Image(over.size(), "white")
-
-    img.composite(over, 0, 0, CompositeOperator.OverCompositeOp)
+    img = Image.open(BytesIO(file_bytes))
+    
+    # Convert to RGB if necessary (handles transparency, CMYK, etc.)
+    if img.mode not in ('RGB', 'L'):
+        # Create white background
+        if img.mode == 'RGBA' or 'transparency' in img.info:
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'RGBA':
+                background.paste(img, mask=img.split()[3])  # Use alpha channel as mask
+            else:
+                background.paste(img)
+            img = background
+        else:
+            img = img.convert('RGB')
+    elif img.mode == 'L':
+        img = img.convert('RGB')
     
     # Get original dimensions
-    size = img.size()
-    orig_width = size.width()
-    orig_height = size.height()
+    orig_width, orig_height = img.size
+    print(f"Original image size: {orig_width}x{orig_height}, mode: {img.mode}")
     
     # Auto-detect orientation based on image aspect ratio
     image_aspect_ratio = orig_width / float(orig_height)
     orientation = 'Landscape' if image_aspect_ratio > 1.0 else 'Portrait'
+    print(f"Orientation: {orientation}, aspect ratio: {image_aspect_ratio}")
     
     # Letter size dimensions
     DPI = 300
@@ -86,49 +86,60 @@ def process_image(request):
     if sheets_horizontal == 1 and sheets_vertical > 1:
         sheets_vertical = 1
         total_height = PRINTABLE_HEIGHT_PX
-    else:
-        # Recalculate total height to match exact sheet count
-        total_height = PRINTABLE_HEIGHT_PX * sheets_vertical
-
-    # Scale the image to fit
-    if sheets_horizontal == 1 and sheets_vertical == 1:
-        # Special case: fit image to single page while maintaining aspect ratio
-        # Scale to fit within the printable area
-        scale_by_width = total_width / float(orig_width)
+        # Recalculate dimensions to fit in single page
+        scale_by_width = PRINTABLE_WIDTH_PX / float(orig_width)
         scale_by_height = PRINTABLE_HEIGHT_PX / float(orig_height)
         scale_factor = min(scale_by_width, scale_by_height)
-        
+        new_width = int(orig_width * scale_factor)
+        new_height = int(orig_height * scale_factor)
+    elif sheets_horizontal == 1 and sheets_vertical == 1:
+        # Also single page - fit within printable area
+        total_height = PRINTABLE_HEIGHT_PX
+        scale_by_width = PRINTABLE_WIDTH_PX / float(orig_width)
+        scale_by_height = PRINTABLE_HEIGHT_PX / float(orig_height)
+        scale_factor = min(scale_by_width, scale_by_height)
         new_width = int(orig_width * scale_factor)
         new_height = int(orig_height * scale_factor)
     else:
+        # Recalculate total height to match exact sheet count
+        total_height = PRINTABLE_HEIGHT_PX * sheets_vertical
         new_width = total_width
         new_height = int(total_width / image_aspect_ratio)
 
-        img.filterType(FilterTypes.PointFilter)
+    # Scale the image to fit
+    if sheets_horizontal == 1:
+        # Single page width - use high quality scaling
+        print(f"Single page mode: resizing to {new_width}x{new_height}")
+        resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    else:
+        # Multi-page - use nearest neighbor as per original code
+        print(f"Multi-page mode: resizing to {new_width}x{new_height}")
+        resized_img = img.resize((new_width, new_height), Image.Resampling.NEAREST)
     
-    # if new_height < total_height:
-    #     new_height = total_height
-    #     new_width = int(total_height * image_aspect_ratio)
-    
-    # Resize image
-    img.scale(Geometry(new_width, new_height))
-    img.density(Geometry(DPI, DPI))
+    print(f"Resized image size: {resized_img.size}, mode: {resized_img.mode}")
     
     # Create canvas
     canvas_width = PRINTABLE_WIDTH_PX * sheets_horizontal
     canvas_height = PRINTABLE_HEIGHT_PX * sheets_vertical
 
-    print(canvas_height, canvas_width)
+    print(f"Canvas size: {canvas_width}x{canvas_height}")
     
     offset_x = (canvas_width - new_width) // 2
     offset_y = (canvas_height - new_height) // 2
     
-    canvas = Image(Geometry(canvas_width, canvas_height), Color("white"))
-    canvas.density(Geometry(DPI, DPI))
-    canvas.composite(img, offset_x, offset_y)
-
-    canvas.magick("JPEG")
-    canvas.quality(85) 
+    print(f"Paste offset: ({offset_x}, {offset_y})")
+    
+    # Create white canvas
+    canvas = Image.new('RGB', (canvas_width, canvas_height), (255, 255, 255))
+    # Paste the resized image onto canvas
+    canvas.paste(resized_img, (offset_x, offset_y))
+    
+    print(f"Canvas after paste - size: {canvas.size}, mode: {canvas.mode}")
+    
+    # Debug: save canvas to check if image is there
+    debug_buffer = BytesIO()
+    canvas.save(debug_buffer, format='JPEG', quality=85)
+    print(f"Canvas JPEG size: {len(debug_buffer.getvalue())} bytes")
     
     # Create image sections
     image_sections = []
@@ -139,20 +150,15 @@ def process_image(request):
             x = col * PRINTABLE_WIDTH_PX
             y = row * PRINTABLE_HEIGHT_PX
             
-            # Create a copy and crop
-            page_blob = Blob()
-            canvas.write(page_blob)
-            page_img = Image(page_blob)
-            page_img.crop(Geometry(PRINTABLE_WIDTH_PX, PRINTABLE_HEIGHT_PX, x, y))
+            # Crop the section
+            page_img = canvas.crop((x, y, x + PRINTABLE_WIDTH_PX, y + PRINTABLE_HEIGHT_PX))
             
-            # Convert to JPEG for embedding in HTML
-            page_img.magick("JPEG")
-            page_img.quality(85)
-            output_blob = Blob()
-            page_img.write(output_blob)
+            # Convert to JPEG
+            output_buffer = BytesIO()
+            page_img.save(output_buffer, format='JPEG', quality=85, dpi=(DPI, DPI))
             
             # Convert to base64 for HTML embedding
-            img_base64 = base64.b64encode(output_blob.data).decode('utf-8')
+            img_base64 = base64.b64encode(output_buffer.getvalue()).decode('utf-8')
             image_sections.append(img_base64)
     
     # Prepare context for template

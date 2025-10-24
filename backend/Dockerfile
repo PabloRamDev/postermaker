@@ -9,11 +9,9 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-dev \
     build-essential \
-    libgraphicsmagick++1-dev \
     libboost-python1.74-dev \
     libboost-system1.74-dev \
     libboost-thread1.74-dev \
-    graphicsmagick \
     wkhtmltopdf \
     fontconfig \
     libjpeg-dev \
