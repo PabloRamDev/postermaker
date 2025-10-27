@@ -7,24 +7,18 @@ import {
   FieldLegend,
   FieldSet,
 } from "./ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
 import { ArrowRight } from "lucide-react";
 import axios from "axios";
 import { useFileStore } from "@/store/file-store";
 import FormWrapper from "./form-wrapper";
+import { Slider } from "./ui/slider";
 
 export default function SubmitSection() {
   const { control, formState, handleSubmit } =
     useFormContext();
-  const { setUploadProgress, setFileUrl, setClose } =
+  const { setFileUrl, setClose } =
     useFileStore();
 
 
@@ -36,18 +30,10 @@ export default function SubmitSection() {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/image-pdf/`,
+        `${import.meta.env.VITE_API_URL}/image-pdf/` || 'http://localhost:8003/api/image-pdf',
         formData,
         {
           responseType: "blob", // Important for file download
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.lengthComputable) {
-              const percentage = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-              setUploadProgress(percentage);
-            }
-          },
         }
       );
 
@@ -80,16 +66,19 @@ export default function SubmitSection() {
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>Hojas en horizontal</FieldLabel>
-              <Select {...field} onValueChange={field.onChange}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Seleccione número" />
-                </SelectTrigger>
-                <SelectContent>
-                  {
-                    [...Array(6).keys()].map(n =><SelectItem key={`option-${n+1}`} value={`${n + 1}`}>{n + 1}</SelectItem>)
-                  }
-                </SelectContent>
-              </Select>
+      <Slider
+        value={[field.value]}
+        onValueChange={(values) => field.onChange(values[0])}
+        min={1}
+        max={6}
+        step={1}
+        className="w-full max-w-md"
+      />
+          <div className="flex justify-between text-xs text-muted-foreground max-w-md">
+      {[1, 2, 3, 4, 5, 6].map(n => (
+        <span key={n}>{n}</span>
+      ))}
+    </div>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

@@ -1,122 +1,56 @@
-import ImageForm from "./components/image-form";
-import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import SubmitSection from "./components/submit-section";
-import * as z from "zod";
-import { formSchema } from "./schemas/form-schema";
-import { useFileStore } from "./store/file-store";
-import { ArrowUpFromLineIcon, DownloadIcon, RotateCcw } from "lucide-react";
-import Preview from "./components/preview";
-import { Button } from "./components/ui/button";
-import { usePrompt } from "./hooks/use-prompt";
-import TextSection from "./components/text-section";
-import { useMediaQuery } from "react-responsive";
+import { FormProvider } from "react-hook-form";
 import Header from "./components/layout/header";
+import { usePosterForm } from "./hooks/use-poster-form";
+import { useFileStore } from "./store/file-store";
+import TextSection from "./components/text-section";
+import PosterPreviewSection from "./components/poster-preview-section";
+import ImageForm from "./components/image-form";
+import DownloadActions from "./components/download-actions";
+import SubmitSection from "./components/submit-section";
 
-function App() {
-  const isTabletOrMobile = useMediaQuery({ maxWidth: 1224 });
-
-  const methods = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      sheets_horizontal: "1",
-      image: [],
-    },
-  });
-
-  const images = methods.watch("image");
+export default function App() {
+  const { methods, handleResetWithPrompt } = usePosterForm();
+  const { fileUrl, preview, previewHeight, previewWidth } = useFileStore();
+  
+  const image = methods.watch("image");
   const sheets = methods.watch("sheets_horizontal");
-
-  const {
-    fileUrl,
-    preview,
-    previewHeight,
-    previewWidth,
-    setPreview,
-    setFileUrl,
-    setOpen,
-  } = useFileStore();
-
-  const handleClose = () => {
-    methods.reset();
-    setPreview(null);
-    setFileUrl("");
-  };
-
-  const [newPrompt] = usePrompt();
-
+  
+  const showPreview = preview && previewHeight > 0 && previewWidth > 0 && sheets > 0;
+  const hasImage = image?.length > 0;
+  
   return (
-    <main className="flex flex-col items-center justify-center frosted-backdrop h-dvh w-dvw">
-                  <Header />
+    <main className="flex flex-col items-center justify-center frosted-backdrop h-dvh w-dvw overflow-hidden">
+      <Header />
       <FormProvider {...methods}>
-        <div className="flex grow min-h-0 h-full w-full px-8 md:px-0">
-                  <div className="flex flex-col items-center justify-center w-full gap-8 py-16">
-          <TextSection
-            isDirty={methods.formState.isDirty}
-            isSubmitSuccessful={methods.formState.isSubmitSuccessful}
-          />
-          {preview !== null &&
-          previewHeight > 0 &&
-          previewWidth > 0 &&
-          parseInt(sheets) > 0 ? (
-            <>
-              <Preview
-                imageUrl={preview[0].preview}
+        <div className="flex grow min-h-0 w-full">
+          <div className="flex flex-col items-center w-full gap-8 py-16 overflow-y-auto">
+            <TextSection isDirty={methods.formState.isDirty} isSubmitSuccessful={methods.formState.isSubmitSuccessful} />
+            
+            {showPreview ? (
+              <PosterPreviewSection
+                preview={preview[0].preview}
                 width={previewWidth}
                 height={previewHeight}
-                horizontal_sheets={parseInt(sheets)}
-                onClose={() => {
-                  newPrompt({
-                    callback: handleClose,
-                    text: "Esta acción reiniciará el formulario. ¿Desea continuar?",
-                  });
-                }}
-                disabled={methods.formState.isSubmitting}
+                sheets={sheets}
+                onClose={handleResetWithPrompt}
+                isSubmitting={methods.formState.isSubmitting}
                 showClose={!methods.formState.isSubmitSuccessful}
               />
-              {isTabletOrMobile && (
-                <Button variant="outline" aria-label="Submit" onClick={setOpen}>
-                  Abrir formulario
-                  <ArrowUpFromLineIcon />
-                </Button>
-              )}
-            </>
-          ) : (
-            <ImageForm />
-          )}
-
-          {fileUrl !== "" && (
-            <div className="flex w-auto items-center justify-center gap-2">
-              <Button asChild className="flex basis-1">
-                <a className="w-full" href={fileUrl} download={"poster"}>
-                  Descargar
-                  <DownloadIcon />
-                </a>
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex basis-1"
-                onClick={() =>
-                  newPrompt({
-                    callback: handleClose,
-                    text: "Esta acción reiniciará el formulario. ¿Desea continuar?",
-                  })
-                }
-              >
-                Reiniciar
-                <RotateCcw />
-              </Button>
-            </div>
-          )}
-           
+            ) : (
+              <ImageForm />
+            )}
+            
+            {fileUrl && (
+              <DownloadActions 
+                fileUrl={fileUrl} 
+                onReset={handleResetWithPrompt} 
+              />
+            )}
+          </div>
+          
+          {hasImage && <SubmitSection />}
         </div>
-       {images.length > 0 && <SubmitSection />}
-        </div>
-
-
       </FormProvider>
     </main>
   );
 }
-
-export default App;
